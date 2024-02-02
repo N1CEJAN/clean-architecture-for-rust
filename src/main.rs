@@ -1,6 +1,8 @@
 use actix_web::{get, web, App, HttpResponse, HttpServer};
 use deadpool_postgres::Pool;
 
+use postgres::{config_factory::ConfigFactory, pool_factory::PoolFactory};
+
 mod postgres;
 mod user;
 
@@ -30,16 +32,16 @@ fn address() -> String {
 async fn main() -> std::io::Result<()> {
     env_logger::init();
 
-    let pg_pool = postgres::create_pool();
-    postgres::migrate_up(&pg_pool).await;
+    let mut pool_factory = PoolFactory::new(ConfigFactory);
+    let pool = pool_factory.create().await;
 
     let address = address();
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(pg_pool.clone()))
+            .app_data(web::Data::new(pool.clone()))
             .service(list_users)
     })
-        .bind(&address)?
-        .run()
-        .await
+    .bind(&address)?
+    .run()
+    .await
 }
