@@ -1,45 +1,44 @@
-use actix_web::{get, web, App, HttpResponse, HttpServer};
-use deadpool_postgres::Pool;
+use std::sync::Arc;
 
-use postgres::{config_factory::ConfigFactory, pool_factory::PoolFactory};
+use actix_web::{App, HttpServer};
+use actix_web::middleware::Logger;
+use actix_web::web::{Data, get, post, scope};
 
-mod postgres;
-mod user;
+use crate::api::controller::user;
+use crate::business::service::user::UserService;
+use crate::driver::dao::user::RawUserDao;
+use crate::driver::database::config_factory::ConfigFactory;
+use crate::driver::database::pool_adapter::PoolAdapter;
+use crate::driver::database::pool_factory::PoolFactory;
 
-#[get("/users")]
-async fn list_users(pool: web::Data<Pool>) -> HttpResponse {
-    let client = match pool.get().await {
-        Ok(client) => client,
-        Err(err) => {
-            log::debug!("unable to get postgres client: {:?}", err);
-            return HttpResponse::InternalServerError().json("unable to get postgres client");
-        }
-    };
-    match user::User::all(&**client).await {
-        Ok(list) => HttpResponse::Ok().json(list),
-        Err(err) => {
-            log::debug!("unable to fetch users: {:?}", err);
-            return HttpResponse::InternalServerError().json("unable to fetch users");
-        }
-    }
-}
-
-fn address() -> String {
-    std::env::var("ADDRESS").unwrap_or_else(|_| "127.0.0.1:8000".into())
-}
+mod api;
+mod business;
+mod core;
+mod driver;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env_logger::init();
 
-    let mut pool_factory = PoolFactory::new(ConfigFactory);
-    let pool = pool_factory.create().await;
+    let address = std::env::var("ADDRESS").unwrap_or_else(|_| "127.0.0.1:8000".into());
 
-    let address = address();
+    let mut pool_factory = PoolFactory::new(ConfigFactory);
+    let pool = Arc::new(pool_factory.create().await);
+    let pool_adapter = Arc::new(PoolAdapter::new(pool));
+    let user_dao = Arc::new(RawUserDao::new(pool_adapter));
+    let user_service = Arc::new(UserService::new(user_dao));
+
     HttpServer::new(move || {
         App::new()
-            .app_data(web::Data::new(pool.clone()))
-            .service(list_users)
+            .app_data(Data::from(user_service.clone()))
+            .wrap(Logger::default())
+            .service(
+                scope("/users")
+                    .route("", get().to(user::index))
+                    .route("/{id}", get().to(user::show))
+                    .route("/create", post().to(user::create))
+                    .route("/delete", post().to(user::delete)),
+            )
     })
     .bind(&address)?
     .run()

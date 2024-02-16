@@ -1,5 +1,5 @@
 [package]
-name = "backend"
+name = "abcd-layered-architecture"
 version = "0.1.0"
 edition = "2021"
 
@@ -12,5 +12,7 @@ env_logger = "0.11.1"
 log = "0.4.20"
 serde = { version = "1.0.196", features = ["derive"] }
 serde_json = "1.0.112"
-tokio-postgres = "0.7.10"
+tokio-postgres = { version = "0.7.10", features = ["with-uuid-1"] }
 tokio-postgres-migration = "0.1.0"
+uuid = { version = "1.7.0", features = ["v7", "serde"] }
+async-trait = { version = "0.1.77", features = [] }
