@@ -1,15 +1,13 @@
-use std::sync::Arc;
-
 use deadpool_postgres::{Object, Pool};
 
 use crate::driver::error::DriverError;
 
 pub struct PoolAdapter {
-    pool: Arc<Pool>,
+    pool: Pool,
 }
 
 impl PoolAdapter {
-    pub fn new(pool: Arc<Pool>) -> Self {
+    pub fn new(pool: Pool) -> Self {
         Self { pool }
     }
 

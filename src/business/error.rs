@@ -1,5 +1,6 @@
 use serde::Serialize;
 
+use crate::core::error::AuthenticationError;
 use crate::driver::error::DriverError;
 
 #[derive(Debug, Serialize)]
@@ -17,6 +18,14 @@ impl From<DriverError> for BusinessError {
     fn from(value: DriverError) -> Self {
         Self {
             message: value.message().to_string(),
+        }
+    }
+}
+
+impl From<AuthenticationError> for BusinessError {
+    fn from(value: AuthenticationError) -> Self {
+        Self {
+            message: value.message().to_string().clone(),
         }
     }
 }
