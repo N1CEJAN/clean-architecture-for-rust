@@ -71,7 +71,7 @@ impl User {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 pub struct UserDto {
     id: Uuid,
     username: String,

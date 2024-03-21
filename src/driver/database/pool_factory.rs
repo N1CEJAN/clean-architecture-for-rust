@@ -8,8 +8,9 @@ pub struct PoolFactory {
     config_factory: ConfigFactory,
 }
 
-const SCRIPTS_UP: [(&str, &str); 1] = [
+const SCRIPTS_UP: [(&str, &str); 2] = [
     ("0001_create-users", include_str!("../../../migrations/0001_create-users_up.sql")),
+    ("0002_create-tokens", include_str!("../../../migrations/0002_create-tokens_up.sql")),
 ];
 
 impl PoolFactory {

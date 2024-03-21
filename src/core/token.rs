@@ -38,7 +38,7 @@ impl Token {
     }
 }
 
-#[derive(Serialize, Clone)]
+#[derive(Serialize, Clone, Debug)]
 pub struct TokenDto {
     id: Uuid,
     key: String,

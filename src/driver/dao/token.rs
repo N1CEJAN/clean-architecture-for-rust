@@ -17,32 +17,32 @@ impl TokenDao {
         Self { pool }
     }
     pub async fn create(&self, token_dto: &TokenDto) -> Result<(), DriverError> {
-        let statement = "INSERT INTO Token VALUES ($1, $2, $3)";
-        let values: [&(dyn ToSql + Sync); 3] =
-            [&token_dto.id(), &token_dto.key(), &token_dto.user_id()];
+        let statement = "INSERT INTO Tokens VALUES ($1, $2, $3, $4)";
+        let values: [&(dyn ToSql + Sync); 4] =
+            [&token_dto.id(), &token_dto.key(), &token_dto.user_id(), &token_dto.is_revoked()];
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         ClientAdapter::execute(&mut client, stmt, &values).await?;
         Ok(())
     }
     pub async fn update(&self, token_dto: &TokenDto) -> Result<(), DriverError> {
-        let statement = "UPDATE Tokens SET key=$2, user_id=$3 WHERE id=$1";
-        let values: [&(dyn ToSql + Sync); 3] =
-            [&token_dto.id(), &token_dto.key(), &token_dto.user_id()];
+        let statement = "UPDATE Tokens SET key=$2, user_id=$3, is_revoked=$4 WHERE id=$1";
+        let values: [&(dyn ToSql + Sync); 4] =
+            [&token_dto.id(), &token_dto.key(), &token_dto.user_id(), &token_dto.is_revoked()];
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         ClientAdapter::execute(&mut client, stmt, &values).await?;
         Ok(())
     }
     pub async fn delete_by_user_id(&self, user_id: &Uuid) -> Result<Vec<TokenDto>, DriverError> {
-        let statement = "DELETE FROM Token WHERE user_id=$1";
+        let statement = "DELETE FROM Tokens WHERE user_id=$1";
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[&user_id]).await?;
         Ok(rows.into_iter().map(|row| TokenDto::from(&row)).collect())
     }
     pub async fn find_by_user_id(&self, user_id: &Uuid) -> Result<Vec<TokenDto>, DriverError> {
-        let statement = "SELECT * FROM Token WHERE user_id=$1";
+        let statement = "SELECT * FROM Tokens WHERE user_id=$1";
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[&user_id]).await?;

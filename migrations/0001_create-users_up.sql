@@ -1,4 +1,4 @@
-CREATE TABLE users (
+CREATE TABLE Users (
   id uuid PRIMARY KEY,
   username VARCHAR UNIQUE NOT NULL,
   password VARCHAR NOT NULL

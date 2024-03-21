@@ -1,6 +1,6 @@
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct RegisterUserRequest {
     username: String,
     password: String,
@@ -21,7 +21,7 @@ impl RegisterUserRequest {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct LoginUserRequest {
     username: String,
     password: String,
