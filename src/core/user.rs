@@ -17,8 +17,8 @@ impl User {
     pub fn new(username: &str, password: &str) -> Self {
         Self {
             id: Uuid::now_v7(),
-            username: hash(username.to_string().clone(), 12).unwrap(),
-            password: password.to_string().clone(),
+            username: username.to_string().clone(),
+            password: hash(password.to_string().clone(), 12).unwrap(),
             tokens: Vec::with_capacity(1)
         }
     }
@@ -44,10 +44,12 @@ impl User {
     }
     pub fn login(&mut self, password: &str) -> Result<(), AuthenticationError> {
         if verify(password, self.password.as_str()).unwrap() {
+            println!("User -> login happy path");
             let refresh_token = Token::new(&self.id);
             self.tokens.push(refresh_token);
             return Ok(())
         }
+        println!("User -> login bad path: {:?} {:?}", password, self.password.as_str());
         Err(AuthenticationError::new("invalid credentials"))
     }
     pub fn refresh(&mut self, old_token_key: &str) -> Result<(), AuthenticationError> {

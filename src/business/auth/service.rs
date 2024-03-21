@@ -20,6 +20,7 @@ impl AuthService {
         Ok(new_user.to_dto())
     }
     pub async fn login(&self, request: LoginUserRequest) -> Result<UserDto, BusinessError> {
+        println!("AuthService -> login");
         let mut user = self
             .user_repository
             .find_by_username(request.username())

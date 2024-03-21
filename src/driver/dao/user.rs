@@ -33,10 +33,12 @@ impl UserDao {
         Ok(rows.first().map(|row| UserDto::from(row)))
     }
     pub async fn find_by_username(&self, username: &str) -> Result<Option<UserDto>, DriverError> {
+        println!("UserDao -> find_by_username");
         let statement = "SELECT * FROM Users WHERE username=$1";
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[&username]).await?;
+        println!("UserDao -> find_by_username rows: {:?}", &rows);
         Ok(rows.first().map(|row| UserDto::from(row)))
     }
     pub async fn find_by_token(&self, key: &str) -> Result<Option<UserDto>, DriverError> {

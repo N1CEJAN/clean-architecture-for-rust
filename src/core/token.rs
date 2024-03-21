@@ -1,4 +1,5 @@
-use rand::random;
+use rand::{random, Rng, thread_rng};
+use rand::distributions::Alphanumeric;
 use serde::Serialize;
 use tokio_postgres::Row;
 use uuid::Uuid;
@@ -12,9 +13,15 @@ pub struct Token {
 
 impl Token {
     pub fn new(user_id: &Uuid) -> Self {
+        let mut rng = thread_rng();
+        let key = (0..32)
+            .map(|_| rng.gen_range(0x0020..0x007E)) // UTF-8 characters in printable ASCII range
+            .map(|c| char::from_u32(c).unwrap())
+            .collect();
+
         Self {
             id: Uuid::now_v7(),
-            key: String::from_utf8(random::<[u8; 32]>().to_vec()).unwrap(),
+            key: key,
             user_id: user_id.clone(),
             is_revoked: false,
         }

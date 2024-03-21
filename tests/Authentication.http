@@ -1,0 +1,17 @@
+### Register
+POST http://localhost:8080/register
+Content-Type: application/json
+
+{
+  "username": "first_username",
+  "password": "first"
+}
+
+### Login
+POST http://localhost:8080/login
+Content-Type: application/json
+
+{
+  "username": "first_username",
+  "password": "first"
+}

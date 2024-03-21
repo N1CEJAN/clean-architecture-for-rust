@@ -42,7 +42,9 @@ impl UserRepository {
         Ok(user_dto.map(move |user_dto| User::from_dto(&user_dto, &vec_of_token_dtos)))
     }
     pub async fn find_by_username(&self, username: &str) -> Result<Option<User>, DriverError> {
+        println!("UserRepository -> find_by_username");
         if let Some(user_dto) = self.user_dao.find_by_username(username).await? {
+            println!("UserRepository -> find_by_username user_dto: {:?}", &user_dto);
             let vec_of_token_dtos = self.token_dao.find_by_user_id(user_dto.id()).await?;
             return Ok(Some(User::from_dto(&user_dto, &vec_of_token_dtos)));
         }
