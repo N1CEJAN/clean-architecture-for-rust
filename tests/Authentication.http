@@ -15,3 +15,14 @@ Content-Type: application/json
   "username": "first_username",
   "password": "first"
 }
+
+> {% client.global.set("auth_token", response.body); %}
+
+### Refresh
+GET http://localhost:8080/refresh
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+### Logout
+GET http://localhost:8080/logout
+Content-Type: application/json

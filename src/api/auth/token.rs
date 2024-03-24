@@ -19,6 +19,7 @@ const RT_COOKIE_NAME: &str = "refresh-token";
 const RT_COOKIE_MAX_AGE: Duration = Duration::minutes(15);
 const RT_COOKIE_HTTP_ONLY: bool = true;
 
+#[derive(Debug)]
 pub struct RefreshToken<'a> {
     cookie: Cookie<'a>,
 }

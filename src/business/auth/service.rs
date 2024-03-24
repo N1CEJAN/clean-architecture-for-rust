@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use log::debug;
 
 use crate::business::auth::request::{LoginUserRequest, RegisterUserRequest};
 use crate::business::error::BusinessError;
@@ -6,6 +7,7 @@ use crate::business::user::repository::UserRepository;
 use crate::core::error::AuthenticationError;
 use crate::core::user::{User, UserDto};
 
+#[derive(Debug)]
 pub struct AuthService {
     user_repository: Arc<UserRepository>,
 }
@@ -20,7 +22,6 @@ impl AuthService {
         Ok(new_user.to_dto())
     }
     pub async fn login(&self, request: LoginUserRequest) -> Result<UserDto, BusinessError> {
-        println!("AuthService -> login");
         let mut user = self
             .user_repository
             .find_by_username(request.username())
@@ -31,6 +32,7 @@ impl AuthService {
         Ok(user.to_dto())
     }
     pub async fn refresh(&self, old_refresh_token: &str) -> Result<UserDto, BusinessError> {
+        debug!("auth/service.refresh() with parameters: {:?}", old_refresh_token);
         let mut user = self
             .user_repository
             .find_by_token(old_refresh_token)

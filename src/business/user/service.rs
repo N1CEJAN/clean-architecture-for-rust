@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use log::debug;
 
 use uuid::Uuid;
 
@@ -16,6 +17,7 @@ impl UserService {
         Self { user_repository }
     }
     pub async fn index(&self) -> Result<Vec<UserDto>, BusinessError> {
+        debug!("UserService.index()");
         let vec_of_user = self.user_repository.find_all().await?;
         Ok(vec_of_user.iter().map(|user| user.to_dto()).collect())
     }

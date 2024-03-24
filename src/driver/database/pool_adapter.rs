@@ -2,6 +2,7 @@ use deadpool_postgres::{Object, Pool};
 
 use crate::driver::error::DriverError;
 
+#[derive(Debug)]
 pub struct PoolAdapter {
     pool: Pool,
 }

@@ -43,7 +43,7 @@ async fn main() -> std::io::Result<()> {
             .service(scope("")
                 .route("/register", post().to(auth_handler::register))
                 .route("/login", post().to(auth_handler::login))
-                .route("/refresh", post().to(auth_handler::refresh))
+                .route("/refresh", get().to(auth_handler::refresh))
                 .route("/logout", post().to(auth_handler::logout))
                 .service(scope("/users")
                     .route("", get().to(user_handler::index))

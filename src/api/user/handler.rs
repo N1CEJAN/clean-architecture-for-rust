@@ -2,6 +2,7 @@ use actix_web::{
     HttpResponse,
     Result, web::{Data, Json, Path},
 };
+use log::debug;
 use uuid::Uuid;
 
 use crate::api::error::ApiError;
@@ -12,6 +13,7 @@ use crate::core::user::UserDto;
 pub async fn index(
     user_service: Data<UserService>
 ) -> Result<Json<Vec<UserDto>>, ApiError> {
+    debug!("user/handler.index()");
     let list_of_user = user_service.index().await?;
     Ok(Json(list_of_user))
 }

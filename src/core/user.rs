@@ -6,6 +6,7 @@ use crate::core::error::AuthenticationError;
 
 use crate::core::token::{Token, TokenDto};
 
+#[derive(Debug)]
 pub struct User {
     id: Uuid,
     username: String,
@@ -44,12 +45,10 @@ impl User {
     }
     pub fn login(&mut self, password: &str) -> Result<(), AuthenticationError> {
         if verify(password, self.password.as_str()).unwrap() {
-            println!("User -> login happy path");
             let refresh_token = Token::new(&self.id);
             self.tokens.push(refresh_token);
             return Ok(())
         }
-        println!("User -> login bad path: {:?} {:?}", password, self.password.as_str());
         Err(AuthenticationError::new("invalid credentials"))
     }
     pub fn refresh(&mut self, old_token_key: &str) -> Result<(), AuthenticationError> {
