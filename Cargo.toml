@@ -15,8 +15,8 @@ deadpool-postgres = "0.12.1"
 tokio-postgres = { version = "0.7.10", features = ["with-uuid-1"] }
 tokio-postgres-migration = "0.1.0"
 uuid = { version = "1.7.0", features = ["v7", "serde"] }
-async-trait = { version = "0.1.77", features = [] }
 futures-util = "0.3.30"
 jsonwebtoken = "9.2.0"
 rand = "0.8.5"
 bcrypt = "0.15.0"
+urlencoding = "2.1.3"

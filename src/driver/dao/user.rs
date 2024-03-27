@@ -34,7 +34,9 @@ impl UserDao {
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[id]).await?;
-        Ok(rows.first().map(|row| UserDto::from(row)))
+        let result = Ok(rows.first().map(|row| UserDto::from(row)));
+        debug!("UserDao.find_by_id() with output: {:?}", result);
+        result
     }
     pub async fn find_by_username(&self, username: &str) -> Result<Option<UserDto>, DriverError> {
         debug!("UserDao.find_by_username() with inputs: username={:?}", username);
@@ -42,7 +44,9 @@ impl UserDao {
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[&username]).await?;
-        Ok(rows.first().map(|row| UserDto::from(row)))
+        let result = Ok(rows.first().map(|row| UserDto::from(row)));
+        debug!("UserDao.find_by_username() with output: {:?}", result);
+        result
     }
     pub async fn find_by_token(&self, key: &str) -> Result<Option<UserDto>, DriverError> {
         debug!("UserDao.find_by_token() with inputs: key={:?}", key);
@@ -50,17 +54,22 @@ impl UserDao {
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[&key]).await?;
-        debug!("dao/user.find_by_token() rows: {:?}", rows);
-        Ok(rows.first().map(|row| UserDto::from(row)))
+        let result = Ok(rows.first().map(|row| UserDto::from(row)));
+        debug!("UserDao.find_by_token() with output: {:?}", result);
+        result
     }
     pub async fn find_all(&self) -> Result<Vec<UserDto>, DriverError> {
+        debug!("UserDao.find_all() with no inputs");
         let statement = "SELECT * FROM Users";
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[]).await?;
-        Ok(rows.iter().map(|row| UserDto::from(row)).collect())
+        let result = Ok(rows.iter().map(|row| UserDto::from(row)).collect());
+        debug!("UserDao.find_all() with output: {:?}", result);
+        result
     }
     pub async fn update(&self, user_dto: &UserDto) -> Result<(), DriverError> {
+        debug!("UserDao.update() with inputs: user_dto={:?}", user_dto);
         let statement = "UPDATE Users SET username=$2, password=$3 WHERE id=$1";
         let values: [&(dyn ToSql + Sync); 3] =
             [&user_dto.id(), &user_dto.username(), &user_dto.password()];
@@ -70,6 +79,7 @@ impl UserDao {
         Ok(())
     }
     pub async fn delete_by_id(&self, id: &Uuid) -> Result<(), DriverError> {
+        debug!("UserDao.delete_by_id() with inputs: id={:?}", id);
         let statement = "DELETE FROM Users WHERE id=$1";
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;

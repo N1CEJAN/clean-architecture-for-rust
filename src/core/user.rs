@@ -53,6 +53,7 @@ impl User {
     }
     pub fn refresh(&mut self, old_token_key: &str) -> Result<(), AuthenticationError> {
         if let Some(old_token) = self.token_by_key(old_token_key) {
+            old_token.validate()?;
             old_token.revoke();
             let new_token = Token::new(&self.id);
             self.tokens.push(new_token);

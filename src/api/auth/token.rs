@@ -1,22 +1,23 @@
+use std::borrow::Cow;
 use std::future::{ready, Ready};
 use std::time::{SystemTime, UNIX_EPOCH};
 
-use actix_web::cookie::time::Duration;
+use actix_web::{FromRequest, HttpRequest};
 use actix_web::cookie::Cookie;
+use actix_web::cookie::time::Duration;
 use actix_web::dev::Payload;
 use actix_web::http::header;
-use actix_web::{FromRequest, HttpRequest};
-use jsonwebtoken::{decode, encode, Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use jsonwebtoken::{Algorithm, decode, DecodingKey, encode, EncodingKey, Header, Validation};
 use serde::{Deserialize, Serialize};
 
 use crate::core::error::AuthenticationError;
+use crate::core::token::TokenDto;
 
 const JWT_ISSUER: &str = "asdf";
 const JWT_TTL_IN_MILLIS: u128 = 1000 * 60 * 15;
 const JWT_SECRET: &str = "secret";
 
 const RT_COOKIE_NAME: &str = "refresh-token";
-const RT_COOKIE_MAX_AGE: Duration = Duration::minutes(15);
 const RT_COOKIE_HTTP_ONLY: bool = true;
 
 #[derive(Debug)]
@@ -25,17 +26,22 @@ pub struct RefreshToken<'a> {
 }
 
 impl<'a> RefreshToken<'a> {
-    pub fn new(key: &'a str) -> Self {
+    pub fn new(token_dto: &'a TokenDto) -> Self {
+        let key = urlencoding::encode(token_dto.key());
+        let ttl = token_dto.expire_at().duration_since(SystemTime::now())
+            .expect("cannot be created from expired token");
+
         let mut cookie = Cookie::new(RT_COOKIE_NAME, key);
         cookie.set_http_only(RT_COOKIE_HTTP_ONLY);
-        cookie.set_max_age(RT_COOKIE_MAX_AGE);
+        cookie.set_max_age(Duration::try_from(ttl)
+            .expect("this obscure error should simply not happen"));
         Self { cookie }
     }
     pub fn cookie(&self) -> &Cookie {
         &self.cookie
     }
-    pub fn key(&self) -> &str {
-        &self.cookie.value()
+    pub fn key(&self) -> Cow<str> {
+        urlencoding::decode(self.cookie.value()).unwrap()
     }
 }
 

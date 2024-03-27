@@ -24,8 +24,8 @@ pub async fn login(
 ) -> actix_web::Result<HttpResponse, ApiError> {
     debug!("auth/handler.login() with parameters: {:?}", json);
     let user_dto = auth_service.login(json.into_inner()).await?;
-    // if no token had been created, auth_service would have failed
-    let refresh_token = RefreshToken::new(user_dto.latest_token().unwrap().key());
+    let refresh_token = RefreshToken::new(user_dto.latest_token()
+        .expect("if no token had been created, auth_service would have failed"));
     let access_token = JsonWebToken::new(user_dto.username());
     Ok(HttpResponse::Ok()
         .cookie(refresh_token.cookie().clone())
@@ -37,9 +37,9 @@ pub async fn refresh<'a>(
     old_refresh_token: RefreshToken<'a>,
 ) -> actix_web::Result<HttpResponse, ApiError> {
     debug!("auth/handler.refresh() with refresh token: {:?}", old_refresh_token);
-    let user_dto = auth_service.refresh(old_refresh_token.key()).await?;
-    // if no token had been created, auth_service would have failed
-    let refresh_token = RefreshToken::new(user_dto.latest_token().unwrap().key());
+    let user_dto = auth_service.refresh(old_refresh_token.key().as_ref()).await?;
+    let refresh_token = RefreshToken::new(user_dto.latest_token()
+        .expect("if no token had been created, auth_service would have failed"));
     let access_token = JsonWebToken::new(user_dto.username());
     Ok(HttpResponse::Ok()
         .cookie(refresh_token.cookie().clone())
@@ -51,6 +51,6 @@ pub async fn logout<'a>(
     refresh_token: RefreshToken<'a>,
 ) -> actix_web::Result<HttpResponse, ApiError> {
     debug!("auth/handler.logout() with refresh token: {:?}", refresh_token);
-    auth_service.logout(refresh_token.key()).await?;
+    auth_service.logout(refresh_token.key().as_ref()).await?;
     Ok(HttpResponse::Ok().finish())
 }

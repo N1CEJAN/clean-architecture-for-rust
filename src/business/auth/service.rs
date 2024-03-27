@@ -17,11 +17,13 @@ impl AuthService {
         Self { user_repository }
     }
     pub async fn register(&self, request: RegisterUserRequest) -> Result<UserDto, BusinessError> {
+        debug!("AuthService.register() with inputs: request={:?}", request);
         let new_user = User::new(request.username(), request.password());
         self.user_repository.create(&new_user).await?;
         Ok(new_user.to_dto())
     }
     pub async fn login(&self, request: LoginUserRequest) -> Result<UserDto, BusinessError> {
+        debug!("AuthService.login() with inputs: request={:?}", request);
         let mut user = self
             .user_repository
             .find_by_username(request.username())
@@ -32,7 +34,7 @@ impl AuthService {
         Ok(user.to_dto())
     }
     pub async fn refresh(&self, old_refresh_token: &str) -> Result<UserDto, BusinessError> {
-        debug!("auth/service.refresh() with parameters: {:?}", old_refresh_token);
+        debug!("AuthService.refresh() with inputs: old_refresh_token={:?}", old_refresh_token);
         let mut user = self
             .user_repository
             .find_by_token(old_refresh_token)
@@ -43,6 +45,7 @@ impl AuthService {
         Ok(user.to_dto())
     }
     pub async fn logout(&self, refresh_token: &str) -> Result<(), BusinessError> {
+        debug!("AuthService.logout() with inputs: refresh_token={:?}", refresh_token);
         let mut user = self
             .user_repository
             .find_by_token(refresh_token)

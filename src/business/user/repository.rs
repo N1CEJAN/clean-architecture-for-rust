@@ -31,7 +31,7 @@ impl UserRepository {
         debug!("UserRepository.update() with inputs: user={:?}", user);
         let user_dto = user.to_dto();
         for token_dto in user_dto.tokens() {
-            self.token_dao.update(token_dto).await?;
+            self.token_dao.save(token_dto).await?;
         }
         self.user_dao.update(&user_dto).await
     }

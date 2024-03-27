@@ -1,13 +1,19 @@
-use rand::{random, Rng, thread_rng};
-use rand::distributions::Alphanumeric;
+use std::time::{Duration, SystemTime};
+
+use rand::{Rng, thread_rng};
 use serde::Serialize;
 use tokio_postgres::Row;
 use uuid::Uuid;
+use crate::core::error::AuthenticationError;
 
+const TOKEN_TTL: Duration = Duration::from_secs(60 * 60); // h = m * s
+
+#[derive(Debug)]
 pub struct Token {
     id: Uuid,
     key: String,
     user_id: Uuid,
+    expire_at: SystemTime,
     is_revoked: bool,
 }
 
@@ -21,8 +27,9 @@ impl Token {
 
         Self {
             id: Uuid::now_v7(),
-            key: key,
+            key,
             user_id: user_id.clone(),
+            expire_at: SystemTime::now() + TOKEN_TTL,
             is_revoked: false,
         }
     }
@@ -31,11 +38,18 @@ impl Token {
             id: token_dto.id().clone(),
             key: token_dto.key().to_string().clone(),
             user_id: token_dto.user_id().clone(),
+            expire_at: token_dto.expire_at().clone(),
             is_revoked: token_dto.is_revoked().clone(),
         }
     }
     pub fn to_dto(&self) -> TokenDto {
-        TokenDto::new(&self.id, self.key.as_str(), &self.user_id, &self.is_revoked)
+        TokenDto::new(&self.id, self.key.as_str(), &self.user_id, &self.expire_at, &self.is_revoked)
+    }
+    pub fn validate(&self) -> Result<(), AuthenticationError> {
+        if !self.is_revoked && SystemTime::now() < self.expire_at {
+            return Err(AuthenticationError::new("invalid token"))
+        }
+        Ok(())
     }
     pub fn revoke(&mut self) {
         self.is_revoked = true;
@@ -50,15 +64,17 @@ pub struct TokenDto {
     id: Uuid,
     key: String,
     user_id: Uuid,
+    expire_at: SystemTime,
     is_revoked: bool,
 }
 
 impl TokenDto {
-    fn new(id: &Uuid, key: &str, user_id: &Uuid, is_revoked: &bool) -> Self {
+    fn new(id: &Uuid, key: &str, user_id: &Uuid, expire_at: &SystemTime, is_revoked: &bool) -> Self {
         Self {
             id: id.clone(),
             key: key.to_string().clone(),
             user_id: user_id.clone(),
+            expire_at: expire_at.clone(),
             is_revoked: is_revoked.clone(),
         }
     }
@@ -71,8 +87,11 @@ impl TokenDto {
     pub fn user_id(&self) -> &Uuid {
         &self.user_id
     }
-    pub fn is_revoked(&self) -> bool {
-        self.is_revoked
+    pub fn expire_at(&self) -> &SystemTime {
+        &self.expire_at
+    }
+    pub fn is_revoked(&self) -> &bool {
+        &self.is_revoked
     }
 }
 
@@ -82,7 +101,8 @@ impl From<&Row> for TokenDto {
             id: value.get(0),
             key: value.get(1),
             user_id: value.get(2),
-            is_revoked: value.get(3),
+            expire_at: value.get(3),
+            is_revoked: value.get(4),
         }
     }
 }
