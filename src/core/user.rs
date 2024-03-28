@@ -1,9 +1,10 @@
 use bcrypt::{hash, verify};
+use log::debug;
 use serde::Serialize;
 use tokio_postgres::Row;
 use uuid::Uuid;
-use crate::core::error::AuthenticationError;
 
+use crate::core::error::AuthenticationError;
 use crate::core::token::{Token, TokenDto};
 
 #[derive(Debug)]
@@ -52,6 +53,7 @@ impl User {
         Err(AuthenticationError::new("invalid credentials"))
     }
     pub fn refresh(&mut self, old_token_key: &str) -> Result<(), AuthenticationError> {
+        debug!("User.refresh() with inputs: old_refresh_token={:?}", old_token_key);
         if let Some(old_token) = self.token_by_key(old_token_key) {
             old_token.validate()?;
             old_token.revoke();

@@ -46,7 +46,7 @@ impl Token {
         TokenDto::new(&self.id, self.key.as_str(), &self.user_id, &self.expire_at, &self.is_revoked)
     }
     pub fn validate(&self) -> Result<(), AuthenticationError> {
-        if !self.is_revoked && SystemTime::now() < self.expire_at {
+        if self.is_revoked || SystemTime::now() > self.expire_at {
             return Err(AuthenticationError::new("invalid token"))
         }
         Ok(())
@@ -55,7 +55,7 @@ impl Token {
         self.is_revoked = true;
     }
     pub fn matches(&self, key: &str) -> bool {
-        &self.key == key
+        self.key == key
     }
 }
 
