@@ -12,7 +12,7 @@ pub struct User {
     id: Uuid,
     username: String,
     password: String,
-    tokens: Vec<Token>
+    tokens: Vec<Token>,
 }
 
 impl User {
@@ -21,7 +21,7 @@ impl User {
             id: Uuid::now_v7(),
             username: username.to_string().clone(),
             password: hash(password.to_string().clone(), 12).unwrap(),
-            tokens: Vec::with_capacity(1)
+            tokens: Vec::with_capacity(1),
         }
     }
     pub fn from_dto(user_dto: &UserDto, list_of_token_dto: &Vec<TokenDto>) -> Self {
@@ -29,7 +29,8 @@ impl User {
             id: user_dto.id().clone(),
             username: user_dto.username().to_string().clone(),
             password: user_dto.password().to_string().clone(),
-            tokens: list_of_token_dto.iter()
+            tokens: list_of_token_dto
+                .iter()
                 .map(|dto| Token::from_dto(dto))
                 .collect(),
         }
@@ -39,34 +40,35 @@ impl User {
             &self.id,
             self.username.as_str(),
             self.password.as_str(),
-            &self.tokens.iter()
-                .map(|token| token.to_dto())
-                .collect(),
+            &self.tokens.iter().map(|token| token.to_dto()).collect(),
         )
     }
     pub fn login(&mut self, password: &str) -> Result<(), AuthenticationError> {
         if verify(password, self.password.as_str()).unwrap() {
             let refresh_token = Token::new(&self.id);
             self.tokens.push(refresh_token);
-            return Ok(())
+            return Ok(());
         }
         Err(AuthenticationError::new("invalid credentials"))
     }
     pub fn refresh(&mut self, old_token_key: &str) -> Result<(), AuthenticationError> {
-        debug!("User.refresh() with inputs: old_refresh_token={:?}", old_token_key);
+        debug!(
+            "User.refresh() with inputs: old_refresh_token={:?}",
+            old_token_key
+        );
         if let Some(old_token) = self.token_by_key(old_token_key) {
             old_token.validate()?;
             old_token.revoke();
             let new_token = Token::new(&self.id);
             self.tokens.push(new_token);
-            return Ok(())
+            return Ok(());
         }
         Err(AuthenticationError::new("invalid token"))
     }
     pub fn logout(&mut self, token_key: &str) -> Result<(), AuthenticationError> {
         if let Some(old_token) = self.token_by_key(token_key) {
             old_token.revoke();
-            return Ok(())
+            return Ok(());
         }
         Err(AuthenticationError::new("invalid token"))
     }

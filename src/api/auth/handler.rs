@@ -1,5 +1,5 @@
-use actix_web::web::{Data, Json};
 use actix_web::HttpResponse;
+use actix_web::web::{Data, Json};
 use log::debug;
 
 use crate::api::auth::token::JsonWebToken;

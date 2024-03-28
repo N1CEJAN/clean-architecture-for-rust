@@ -41,4 +41,3 @@ impl LoginUserRequest {
         &self.password
     }
 }
-

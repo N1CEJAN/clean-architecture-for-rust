@@ -1,6 +1,6 @@
 use std::sync::Arc;
-use log::debug;
 
+use log::debug;
 use uuid::Uuid;
 
 use crate::business::error::BusinessError;

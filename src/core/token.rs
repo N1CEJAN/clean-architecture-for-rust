@@ -4,6 +4,7 @@ use rand::{Rng, thread_rng};
 use serde::Serialize;
 use tokio_postgres::Row;
 use uuid::Uuid;
+
 use crate::core::error::AuthenticationError;
 
 const TOKEN_TTL: Duration = Duration::from_secs(60 * 60); // h = m * s
@@ -43,11 +44,17 @@ impl Token {
         }
     }
     pub fn to_dto(&self) -> TokenDto {
-        TokenDto::new(&self.id, self.key.as_str(), &self.user_id, &self.expire_at, &self.is_revoked)
+        TokenDto::new(
+            &self.id,
+            self.key.as_str(),
+            &self.user_id,
+            &self.expire_at,
+            &self.is_revoked,
+        )
     }
     pub fn validate(&self) -> Result<(), AuthenticationError> {
         if self.is_revoked || SystemTime::now() > self.expire_at {
-            return Err(AuthenticationError::new("invalid token"))
+            return Err(AuthenticationError::new("invalid token"));
         }
         Ok(())
     }
@@ -69,7 +76,13 @@ pub struct TokenDto {
 }
 
 impl TokenDto {
-    fn new(id: &Uuid, key: &str, user_id: &Uuid, expire_at: &SystemTime, is_revoked: &bool) -> Self {
+    fn new(
+        id: &Uuid,
+        key: &str,
+        user_id: &Uuid,
+        expire_at: &SystemTime,
+        is_revoked: &bool,
+    ) -> Self {
         Self {
             id: id.clone(),
             key: key.to_string().clone(),

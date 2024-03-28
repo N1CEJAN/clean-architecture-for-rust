@@ -1,4 +1,5 @@
 use std::sync::Arc;
+
 use log::debug;
 
 use crate::business::auth::request::{LoginUserRequest, RegisterUserRequest};

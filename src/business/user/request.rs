@@ -26,5 +26,3 @@ impl DeleteUserRequest {
         &self.user_id
     }
 }
-
-
