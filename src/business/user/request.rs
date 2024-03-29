@@ -1,13 +1,13 @@
 use serde::Deserialize;
 use uuid::Uuid;
 
-#[derive(Deserialize)]
-pub struct CreateUserRequest {
+#[derive(Deserialize, Debug)]
+pub struct RegisterUserRequest {
     username: String,
     password: String,
 }
 
-impl CreateUserRequest {
+impl RegisterUserRequest {
     pub fn username(&self) -> &str {
         &self.username
     }
@@ -16,7 +16,7 @@ impl CreateUserRequest {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct DeleteUserRequest {
     user_id: Uuid,
 }

@@ -8,6 +8,7 @@ use actix_web::cookie::time::Duration;
 use actix_web::dev::Payload;
 use actix_web::http::header;
 use jsonwebtoken::{Algorithm, decode, DecodingKey, encode, EncodingKey, Header, Validation};
+use log::debug;
 use serde::{Deserialize, Serialize};
 
 use crate::core::error::AuthenticationError;
@@ -72,6 +73,9 @@ impl JsonWebToken {
     pub fn key(&self) -> &str {
         &self.key
     }
+    pub fn username(&self) -> &str {
+        &self.claims.sub.as_str()
+    }
     fn encode(claims: Claims) -> Self {
         let key = encode(
             &Header::default(),
@@ -81,19 +85,19 @@ impl JsonWebToken {
         .unwrap();
         Self { key, claims }
     }
-    fn decode(key: &str) -> Self {
+    fn decode(key: &str) -> Result<Self, AuthenticationError> {
         let claims = decode::<Claims>(
             key,
             &DecodingKey::from_secret(JWT_SECRET.as_ref()),
             &Validation::new(Algorithm::HS256),
         )
-        .unwrap()
+        .map_err(|err| AuthenticationError::new(err.to_string().as_str()))?
         .claims;
 
-        Self {
+        Ok(Self {
             key: key.to_string().clone(),
             claims,
-        }
+        })
     }
 }
 
@@ -104,7 +108,8 @@ impl FromRequest for JsonWebToken {
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
         if let Some(header) = req.headers().get(header::AUTHORIZATION) {
             if let Some(header_value) = header.to_str().ok() {
-                return ready(Ok(JsonWebToken::decode(&header_value[6..])));
+                debug!("{:?}", &header_value[7..]);
+                return ready(JsonWebToken::decode(&header_value[7..]));
             }
         }
         ready(Err(AuthenticationError::new(

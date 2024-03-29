@@ -1,3 +1,17 @@
-### Login
+### Register
+POST http://localhost:8080/users/register
+Content-Type: application/json
+
+{
+  "username": "first_username",
+  "password": "first"
+}
+
+### Show all
 GET http://localhost:8080/users
+Content-Type: application/json
+
+### Show all (protected)
+GET http://localhost:8080/users/protected
+Authorization: Bearer {{auth_token}}
 Content-Type: application/json

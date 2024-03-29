@@ -29,10 +29,7 @@ impl User {
             id: user_dto.id().clone(),
             username: user_dto.username().to_string().clone(),
             password: user_dto.password().to_string().clone(),
-            tokens: list_of_token_dto
-                .iter()
-                .map(|dto| Token::from_dto(dto))
-                .collect(),
+            tokens: list_of_token_dto.iter().map(|dto| Token::from_dto(dto)).collect(),
         }
     }
     pub fn to_dto(&self) -> UserDto {
@@ -51,12 +48,9 @@ impl User {
         }
         Err(AuthenticationError::new("invalid credentials"))
     }
-    pub fn refresh(&mut self, old_token_key: &str) -> Result<(), AuthenticationError> {
-        debug!(
-            "User.refresh() with inputs: old_refresh_token={:?}",
-            old_token_key
-        );
-        if let Some(old_token) = self.token_by_key(old_token_key) {
+    pub fn refresh(&mut self, token_key: &str) -> Result<(), AuthenticationError> {
+        debug!("User.refresh() with inputs: token_key={:?}", token_key);
+        if let Some(old_token) = self.token_by_key(token_key) {
             old_token.validate()?;
             old_token.revoke();
             let new_token = Token::new(&self.id);
@@ -117,7 +111,7 @@ impl From<&Row> for UserDto {
             id: value.get(0),
             username: value.get(1),
             password: value.get(2),
-            tokens: Vec::with_capacity(1),
+            tokens: Vec::new(),
         }
     }
 }

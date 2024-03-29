@@ -5,8 +5,10 @@ use actix_web::{
 use log::debug;
 use uuid::Uuid;
 
+use crate::api::auth::token::JsonWebToken;
 use crate::api::error::ApiError;
 use crate::business::user::request::DeleteUserRequest;
+use crate::business::user::request::RegisterUserRequest;
 use crate::business::user::service::UserService;
 use crate::core::user::UserDto;
 
@@ -16,20 +18,38 @@ pub async fn index(user_service: Data<UserService>) -> Result<Json<Vec<UserDto>>
     Ok(Json(list_of_user))
 }
 
+pub async fn protected_index(
+    user_service: Data<UserService>,
+    jwt: JsonWebToken,
+) -> Result<Json<Vec<UserDto>>, ApiError> {
+    debug!("user/handler.protected_index() with inputs: username={:?}", jwt.username());
+    let list_of_user = user_service.index().await?;
+    Ok(Json(list_of_user))
+}
+
 pub async fn show(
     user_service: Data<UserService>,
     params: Path<Uuid>,
 ) -> Result<Json<Option<UserDto>>, ApiError> {
-    let user_id = params.into_inner();
-    let option = user_service.show(user_id).await?;
+    debug!("user/handler.show() with inputs: params={:?}", params);
+    let option = user_service.show(params.into_inner()).await?;
     Ok(Json(option))
+}
+
+pub async fn register(
+    user_service: Data<UserService>,
+    json: Json<RegisterUserRequest>,
+) -> Result<HttpResponse, ApiError> {
+    debug!("user/handler.register() with inputs: json={:?}", json);
+    user_service.register(json.into_inner()).await?;
+    Ok(HttpResponse::Ok().finish())
 }
 
 pub async fn delete(
     user_service: Data<UserService>,
     json: Json<DeleteUserRequest>,
 ) -> Result<HttpResponse, ApiError> {
-    let request = json.into_inner();
-    user_service.delete(request).await?;
+    debug!("user/handler.delete() with inputs: json={:?}", json);
+    user_service.delete(json.into_inner()).await?;
     Ok(HttpResponse::NoContent().finish())
 }
