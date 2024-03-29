@@ -1,0 +1,30 @@
+services:
+  backend:
+    build:
+      target: ${BUILD_TARGET}
+    restart: unless-stopped
+    environment:
+      - ADDRESS=0.0.0.0:8000
+      - RUST_LOG=${RUST_LOG_LEVEL}
+      - PG_HOST=${DB_HOST}
+      - PG_DBNAME=${DB_NAME}
+      - PG_USER=${DB_USER}
+      - PG_PASSWORD=${DB_PASSWORD}
+      - RUST_BACKTRACE=1
+    ports:
+      - 8080:8000
+    depends_on:
+      - db
+
+  db:
+    image: postgres:alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+
+volumes:
+  db-data: {}
