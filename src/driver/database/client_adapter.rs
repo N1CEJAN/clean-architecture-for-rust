@@ -9,9 +9,9 @@ pub struct ClientAdapter;
 impl ClientAdapter {
     pub async fn prepare(client: &mut Client, statement: &str) -> Result<Statement, DriverError> {
         client
-            .prepare(&statement)
+            .prepare(statement)
             .await
-            .map_err(|error| DriverError::from(error))
+            .map_err(DriverError::from)
     }
 
     pub async fn execute(
@@ -22,7 +22,7 @@ impl ClientAdapter {
         client
             .execute(&stmt, values)
             .await
-            .map_err(|error| DriverError::from(error))?;
+            .map_err(DriverError::from)?;
         Ok(())
     }
 
@@ -34,6 +34,6 @@ impl ClientAdapter {
         client
             .query(&stmt, values)
             .await
-            .map_err(|error| DriverError::from(error))
+            .map_err(DriverError::from)
     }
 }

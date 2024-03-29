@@ -34,7 +34,7 @@ impl UserDao {
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[id]).await?;
-        let result = Ok(rows.first().map(|row| UserDto::from(row)));
+        let result = Ok(rows.first().map(UserDto::from));
         debug!("UserDao.find_by_id() with output: {:?}", result);
         result
     }
@@ -47,7 +47,7 @@ impl UserDao {
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[&username]).await?;
-        let result = Ok(rows.first().map(|row| UserDto::from(row)));
+        let result = Ok(rows.first().map(UserDto::from));
         debug!("UserDao.find_by_username() with output: {:?}", result);
         result
     }
@@ -58,7 +58,7 @@ impl UserDao {
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[&key]).await?;
-        let result = Ok(rows.first().map(|row| UserDto::from(row)));
+        let result = Ok(rows.first().map(UserDto::from));
         debug!("UserDao.find_by_token() with output: {:?}", result);
         result
     }
@@ -68,7 +68,7 @@ impl UserDao {
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
         let rows = ClientAdapter::query(&mut client, stmt, &[]).await?;
-        let result = Ok(rows.iter().map(|row| UserDto::from(row)).collect());
+        let result = Ok(rows.iter().map(UserDto::from).collect());
         debug!("UserDao.find_all() with output: {:?}", result);
         result
     }

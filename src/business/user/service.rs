@@ -34,6 +34,6 @@ impl UserService {
     }
     pub async fn delete(&self, request: DeleteUserRequest) -> Result<(), BusinessError> {
         self.user_repository.delete_by_id(request.user_id()).await
-            .map_err(|error| BusinessError::from(error))
+            .map_err(BusinessError::from)
     }
 }

@@ -6,7 +6,7 @@ use crate::business::auth::request::LoginUserRequest;
 use crate::business::error::BusinessError;
 use crate::business::user::repository::UserRepository;
 use crate::core::error::AuthenticationError;
-use crate::core::user::{User, UserDto};
+use crate::core::user::UserDto;
 
 #[derive(Debug)]
 pub struct AuthService {

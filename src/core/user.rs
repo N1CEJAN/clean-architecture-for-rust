@@ -24,12 +24,12 @@ impl User {
             tokens: Vec::with_capacity(1),
         }
     }
-    pub fn from_dto(user_dto: &UserDto, list_of_token_dto: &Vec<TokenDto>) -> Self {
+    pub fn from_dto(user_dto: &UserDto, list_of_token_dto: &[TokenDto]) -> Self {
         Self {
-            id: user_dto.id().clone(),
+            id: *user_dto.id(),
             username: user_dto.username().to_string().clone(),
             password: user_dto.password().to_string().clone(),
-            tokens: list_of_token_dto.iter().map(|dto| Token::from_dto(dto)).collect(),
+            tokens: list_of_token_dto.iter().map(Token::from_dto).collect(),
         }
     }
     pub fn to_dto(&self) -> UserDto {
@@ -37,7 +37,7 @@ impl User {
             &self.id,
             self.username.as_str(),
             self.password.as_str(),
-            &self.tokens.iter().map(|token| token.to_dto()).collect(),
+            &self.tokens.iter().map(|token| token.to_dto()).collect::<Vec<TokenDto>>(),
         )
     }
     pub fn login(&mut self, password: &str) -> Result<(), AuthenticationError> {
@@ -80,9 +80,9 @@ pub struct UserDto {
 }
 
 impl UserDto {
-    fn new(id: &Uuid, username: &str, password: &str, tokens: &Vec<TokenDto>) -> Self {
+    fn new(id: &Uuid, username: &str, password: &str, tokens: &[TokenDto]) -> Self {
         Self {
-            id: id.clone(),
+            id: *id,
             username: username.to_string().clone(),
             password: password.to_string().clone(),
             tokens: tokens.to_vec(),

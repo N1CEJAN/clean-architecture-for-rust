@@ -29,18 +29,18 @@ impl Token {
         Self {
             id: Uuid::now_v7(),
             key,
-            user_id: user_id.clone(),
+            user_id: *user_id,
             expire_at: SystemTime::now() + TOKEN_TTL,
             is_revoked: false,
         }
     }
     pub fn from_dto(token_dto: &TokenDto) -> Self {
         Self {
-            id: token_dto.id().clone(),
+            id: *token_dto.id(),
             key: token_dto.key().to_string().clone(),
-            user_id: token_dto.user_id().clone(),
-            expire_at: token_dto.expire_at().clone(),
-            is_revoked: token_dto.is_revoked().clone(),
+            user_id: *token_dto.user_id(),
+            expire_at: *token_dto.expire_at(),
+            is_revoked: *token_dto.is_revoked(),
         }
     }
     pub fn to_dto(&self) -> TokenDto {
@@ -84,11 +84,11 @@ impl TokenDto {
         is_revoked: &bool,
     ) -> Self {
         Self {
-            id: id.clone(),
+            id: *id,
             key: key.to_string().clone(),
-            user_id: user_id.clone(),
-            expire_at: expire_at.clone(),
-            is_revoked: is_revoked.clone(),
+            user_id: *user_id,
+            expire_at: *expire_at,
+            is_revoked: *is_revoked,
         }
     }
     pub fn id(&self) -> &Uuid {

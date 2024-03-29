@@ -74,7 +74,7 @@ impl JsonWebToken {
         &self.key
     }
     pub fn username(&self) -> &str {
-        &self.claims.sub.as_str()
+        self.claims.sub.as_str()
     }
     fn encode(claims: Claims) -> Self {
         let key = encode(
@@ -107,7 +107,7 @@ impl FromRequest for JsonWebToken {
 
     fn from_request(req: &HttpRequest, _: &mut Payload) -> Self::Future {
         if let Some(header) = req.headers().get(header::AUTHORIZATION) {
-            if let Some(header_value) = header.to_str().ok() {
+            if let Ok(header_value) = header.to_str() {
                 debug!("{:?}", &header_value[7..]);
                 return ready(JsonWebToken::decode(&header_value[7..]));
             }

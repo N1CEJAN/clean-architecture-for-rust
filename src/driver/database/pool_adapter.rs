@@ -16,6 +16,6 @@ impl PoolAdapter {
         self.pool
             .get()
             .await
-            .map_err(|error| DriverError::from(error))
+            .map_err(DriverError::from)
     }
 }
