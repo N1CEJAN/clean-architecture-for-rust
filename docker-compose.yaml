@@ -1,7 +1,6 @@
 services:
   backend:
-    build:
-      target: ${BUILD_TARGET}
+    build: .
     restart: unless-stopped
     environment:
       - ADDRESS=0.0.0.0:8000
