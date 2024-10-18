@@ -25,7 +25,7 @@ impl From<DriverError> for BusinessError {
 impl From<AuthenticationError> for BusinessError {
     fn from(value: AuthenticationError) -> Self {
         Self {
-            message: value.message().to_string().clone(),
+            message: value.message().to_owned(),
         }
     }
 }

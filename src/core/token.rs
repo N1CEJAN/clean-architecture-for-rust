@@ -1,6 +1,6 @@
 use std::time::{Duration, SystemTime};
 
-use rand::{Rng, thread_rng};
+use rand::{thread_rng, Rng};
 use serde::Serialize;
 use tokio_postgres::Row;
 use uuid::Uuid;
@@ -19,7 +19,7 @@ pub struct Token {
 }
 
 impl Token {
-    pub fn new(user_id: &Uuid) -> Self {
+    pub fn new(user_id: Uuid) -> Self {
         let mut rng = thread_rng();
         let key = (0..32)
             .map(|_| rng.gen_range(0x0020..0x007E)) // UTF-8 characters in printable ASCII range
@@ -29,7 +29,7 @@ impl Token {
         Self {
             id: Uuid::now_v7(),
             key,
-            user_id: *user_id,
+            user_id,
             expire_at: SystemTime::now() + TOKEN_TTL,
             is_revoked: false,
         }
@@ -37,7 +37,7 @@ impl Token {
     pub fn from_dto(token_dto: &TokenDto) -> Self {
         Self {
             id: *token_dto.id(),
-            key: token_dto.key().to_string().clone(),
+            key: token_dto.key().to_owned(),
             user_id: *token_dto.user_id(),
             expire_at: *token_dto.expire_at(),
             is_revoked: *token_dto.is_revoked(),
@@ -45,11 +45,11 @@ impl Token {
     }
     pub fn to_dto(&self) -> TokenDto {
         TokenDto::new(
-            &self.id,
-            self.key.as_str(),
-            &self.user_id,
-            &self.expire_at,
-            &self.is_revoked,
+            self.id,
+            self.key.to_owned(),
+            self.user_id,
+            self.expire_at,
+            self.is_revoked,
         )
     }
     pub fn validate(&self) -> Result<(), AuthenticationError> {
@@ -76,19 +76,13 @@ pub struct TokenDto {
 }
 
 impl TokenDto {
-    fn new(
-        id: &Uuid,
-        key: &str,
-        user_id: &Uuid,
-        expire_at: &SystemTime,
-        is_revoked: &bool,
-    ) -> Self {
+    fn new(id: Uuid, key: String, user_id: Uuid, expire_at: SystemTime, is_revoked: bool) -> Self {
         Self {
-            id: *id,
-            key: key.to_string().clone(),
-            user_id: *user_id,
-            expire_at: *expire_at,
-            is_revoked: *is_revoked,
+            id,
+            key,
+            user_id,
+            expire_at,
+            is_revoked,
         }
     }
     pub fn id(&self) -> &Uuid {

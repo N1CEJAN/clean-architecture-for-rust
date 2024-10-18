@@ -19,12 +19,12 @@ pub async fn login(
     let access_token = JsonWebToken::new(user_dto.username());
     Ok(HttpResponse::Ok()
         .cookie(new_refresh_token.cookie().clone())
-        .json(Json(access_token.key().to_string().clone())))
+        .json(Json(access_token.key().to_owned())))
 }
 
-pub async fn refresh<'a>(
+pub async fn refresh(
     auth_service: Data<AuthService>,
-    refresh_token: RefreshToken<'a>,
+    refresh_token: RefreshToken<'_>,
 ) -> Result<HttpResponse, ApiError> {
     debug!("auth/handler.refresh() with inputs: refresh_token={:?}", refresh_token);
     let user_dto = auth_service.refresh(refresh_token.key().as_ref()).await?;
@@ -33,12 +33,12 @@ pub async fn refresh<'a>(
     let access_token = JsonWebToken::new(user_dto.username());
     Ok(HttpResponse::Ok()
         .cookie(new_refresh_token.cookie().clone())
-        .json(Json(access_token.key().to_string().clone())))
+        .json(Json(access_token.key().to_owned())))
 }
 
-pub async fn logout<'a>(
+pub async fn logout(
     auth_service: Data<AuthService>,
-    refresh_token: RefreshToken<'a>,
+    refresh_token: RefreshToken<'_>,
 ) -> Result<HttpResponse, ApiError> {
     debug!("auth/handler.logout() with inputs: refresh_token={:?}", refresh_token);
     auth_service.logout(refresh_token.key().as_ref()).await?;

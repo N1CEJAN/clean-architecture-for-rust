@@ -28,7 +28,7 @@ impl UserService {
     }
     pub async fn register(&self, request: RegisterUserRequest) -> Result<UserDto, BusinessError> {
         debug!("UserService.register() with inputs: request={:?}", request);
-        let new_user = User::new(request.username(), request.password());
+        let new_user = User::new(request.username().to_owned(), request.password().to_owned());
         self.user_repository.create(&new_user).await?;
         Ok(new_user.to_dto())
     }

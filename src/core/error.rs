@@ -11,7 +11,7 @@ pub struct AuthenticationError {
 impl AuthenticationError {
     pub fn new(message: &str) -> Self {
         Self {
-            message: message.to_string().clone(),
+            message: message.to_owned(),
         }
     }
     pub fn message(&self) -> &str {

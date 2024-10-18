@@ -16,33 +16,36 @@ pub struct User {
 }
 
 impl User {
-    pub fn new(username: &str, password: &str) -> Self {
+    pub fn new(username: String, password: String) -> Self {
         Self {
             id: Uuid::now_v7(),
-            username: username.to_string().clone(),
-            password: hash(password.to_string().clone(), 12).unwrap(),
+            username,
+            password: hash(password, 12).unwrap(),
             tokens: Vec::with_capacity(1),
         }
     }
     pub fn from_dto(user_dto: &UserDto, list_of_token_dto: &[TokenDto]) -> Self {
         Self {
             id: *user_dto.id(),
-            username: user_dto.username().to_string().clone(),
-            password: user_dto.password().to_string().clone(),
+            username: user_dto.username().to_owned(),
+            password: user_dto.password().to_owned(),
             tokens: list_of_token_dto.iter().map(Token::from_dto).collect(),
         }
     }
     pub fn to_dto(&self) -> UserDto {
         UserDto::new(
-            &self.id,
-            self.username.as_str(),
-            self.password.as_str(),
-            &self.tokens.iter().map(|token| token.to_dto()).collect::<Vec<TokenDto>>(),
+            self.id,
+            self.username.to_owned(),
+            self.password.to_owned(),
+            self.tokens
+                .iter()
+                .map(|token| token.to_dto())
+                .collect::<Vec<_>>(),
         )
     }
     pub fn login(&mut self, password: &str) -> Result<(), AuthenticationError> {
         if verify(password, self.password.as_str()).unwrap() {
-            let refresh_token = Token::new(&self.id);
+            let refresh_token = Token::new(self.id);
             self.tokens.push(refresh_token);
             return Ok(());
         }
@@ -53,7 +56,7 @@ impl User {
         if let Some(old_token) = self.token_by_key(token_key) {
             old_token.validate()?;
             old_token.revoke();
-            let new_token = Token::new(&self.id);
+            let new_token = Token::new(self.id);
             self.tokens.push(new_token);
             return Ok(());
         }
@@ -80,12 +83,12 @@ pub struct UserDto {
 }
 
 impl UserDto {
-    fn new(id: &Uuid, username: &str, password: &str, tokens: &[TokenDto]) -> Self {
+    fn new(id: Uuid, username: String, password: String, tokens: Vec<TokenDto>) -> Self {
         Self {
-            id: *id,
-            username: username.to_string().clone(),
-            password: password.to_string().clone(),
-            tokens: tokens.to_vec(),
+            id,
+            username,
+            password,
+            tokens,
         }
     }
     pub fn id(&self) -> &Uuid {
@@ -98,7 +101,7 @@ impl UserDto {
         &self.password
     }
     pub fn tokens(&self) -> &Vec<TokenDto> {
-        &self.tokens
+        self.tokens.as_ref()
     }
     pub fn latest_token(&self) -> Option<&TokenDto> {
         self.tokens.last()

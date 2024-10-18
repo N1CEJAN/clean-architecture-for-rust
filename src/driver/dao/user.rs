@@ -39,10 +39,7 @@ impl UserDao {
         result
     }
     pub async fn find_by_username(&self, username: &str) -> Result<Option<UserDto>, DriverError> {
-        debug!(
-            "UserDao.find_by_username() with inputs: username={:?}",
-            username
-        );
+        debug!("UserDao.find_by_username() with inputs: username={username:?}");
         let statement = "SELECT * FROM Users WHERE username=$1";
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;

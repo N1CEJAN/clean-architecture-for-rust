@@ -30,7 +30,7 @@ impl PoolFactory {
 
     async fn migrate(&mut self, pool: &Pool) {
         let mut client = pool.get().await.expect("could not get postgres client");
-        let migration = Migration::new("migrations".to_string());
+        let migration = Migration::new("migrations".to_owned());
         migration
             .up(&mut **client, &SCRIPTS_UP)
             .await

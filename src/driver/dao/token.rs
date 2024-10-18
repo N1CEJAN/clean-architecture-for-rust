@@ -56,10 +56,7 @@ impl TokenDao {
         Ok(())
     }
     pub async fn delete_by_user_id(&self, user_id: &Uuid) -> Result<(), DriverError> {
-        debug!(
-            "TokenDao.delete_by_user_id() with inputs: user_id={:?}",
-            user_id
-        );
+        debug!("TokenDao.delete_by_user_id() with inputs: user_id={user_id:?}");
         let statement = "DELETE FROM Tokens WHERE user_id=$1";
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;
@@ -67,10 +64,7 @@ impl TokenDao {
         Ok(())
     }
     pub async fn find_by_user_id(&self, user_id: &Uuid) -> Result<Vec<TokenDto>, DriverError> {
-        debug!(
-            "TokenDao.find_by_user_id() with inputs: user_id={:?}",
-            user_id
-        );
+        debug!("TokenDao.find_by_user_id() with inputs: user_id={user_id:?}");
         let statement = "SELECT * FROM Tokens WHERE user_id=$1";
         let mut client = self.pool.get_connection().await?;
         let stmt = ClientAdapter::prepare(&mut client, statement).await?;

@@ -95,7 +95,7 @@ impl JsonWebToken {
         .claims;
 
         Ok(Self {
-            key: key.to_string().clone(),
+            key: key.to_owned(),
             claims,
         })
     }
@@ -133,10 +133,10 @@ impl Claims {
             .unwrap()
             .as_millis();
         Self {
-            iss: JWT_ISSUER.to_string(),
+            iss: JWT_ISSUER.to_owned(),
             iat: now,
             exp: now + JWT_TTL_IN_MILLIS,
-            sub: sub.to_string().clone(),
+            sub: sub.to_owned(),
         }
     }
 }
