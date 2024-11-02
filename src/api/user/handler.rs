@@ -5,7 +5,7 @@ use actix_web::{
 use log::debug;
 use uuid::Uuid;
 
-use crate::api::auth::token::JsonWebToken;
+use crate::api::auth::access_token::JsonWebToken;
 use crate::api::error::ApiError;
 use crate::business::user::request::DeleteUserRequest;
 use crate::business::user::request::RegisterUserRequest;
